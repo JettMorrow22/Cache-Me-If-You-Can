@@ -18,6 +18,47 @@ The application addresses the challenge of finding compatible running partners a
 
 The platform is particularly useful for running clubs, college running communities, and local running groups who want to coordinate group activities and connect runners with similar goals and abilities.
 
+## User Types
+
+The application supports three user types with different permissions and capabilities:
+
+### Runner (Default)
+
+Runners are the standard user type. Runners can:
+
+- Browse and search for runs using the RunFinder
+- Join group runs that match their preferences
+- View their profile and running preferences
+- View their scheduled runs and running history
+- Update their personal information and preferences
+
+**Limitations**: Runners cannot create runs or access leader/admin features.
+
+### Leader
+
+Leaders have all runner capabilities, plus the ability to organize group runs. Leaders can:
+
+- **Create Runs**: Create new group runs with routes, pace, date, and time
+- **Manage Runs**: View, edit, and delete runs they've created
+- **View Participants**: See who has joined their runs
+- **Manage Participants**: Remove participants from their runs
+- **Leader Dashboard**: Access a dedicated dashboard to manage all their runs and view leader-specific statistics
+- **Save Routes**: Save routes they've created for easy reuse
+
+Leaders are designated during signup (users can choose to sign up as a leader) or can be promoted by administrators.
+
+### Admin
+
+Admins have the highest level of access and can manage the entire platform. Admins have all leader capabilities, plus:
+
+- **User Management**: View all registered users in the system
+- **Promote Users**: Grant admin status to other users
+- **Manage Leader Status**: Grant or revoke leader status for any user
+- **Admin Statistics**: View platform-wide statistics (total runs, users, routes, etc.)
+- **Admin Panel**: Access admin features through the profile page
+
+Admin status can only be granted by existing administrators and cannot be self-assigned or revoked through the UI.
+
 ---
 
 .env file
