@@ -1,4 +1,5 @@
 import { getDistance } from 'geolib';
+import { getApiUrl } from '../config/api';
 
 /**
  * Converts a street address to coordinates using Google Maps Geocoding API
@@ -7,7 +8,7 @@ import { getDistance } from 'geolib';
  */
 export async function addressToCoordinates(address) {
   const response = await fetch(
-    `/api/geocode?address=${encodeURIComponent(address)}`
+    getApiUrl(`/api/geocode?address=${encodeURIComponent(address)}`)
   );
 
   const data = await response.json();
@@ -32,7 +33,7 @@ export async function addressToCoordinates(address) {
  */
 export async function coordinatesToAddress(lat, lng) {
   const response = await fetch(
-    `/api/reverse-geocode?lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}`
+    getApiUrl(`/api/reverse-geocode?lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}`)
   );
 
   const data = await response.json();

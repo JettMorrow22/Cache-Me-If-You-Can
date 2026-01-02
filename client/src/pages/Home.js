@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { formatPace } from "../utils/paceFormatters";
+import { getApiUrl } from "../config/api";
+import { coordinatesToAddress } from "../services/geocoding";
 import "../styles/Home.css";
 
 // Minimal hero-style landing for authenticated users
@@ -10,6 +12,7 @@ function Home() {
   const [scenic, setScenic] = useState([]);
   const [scenicIndex, setScenicIndex] = useState(0);
   const [scenicError, setScenicError] = useState(null);
+  const [city, setCity] = useState("Blacksburg, VA"); // Default fallback
 
   const formatPaceRange = (min, max) => {
     if (!min && !max) return "Pace preference not set";
@@ -19,13 +22,55 @@ function Home() {
     return "Pace preference not set";
   };
 
+  // Get user's location and set city
+  useEffect(() => {
+    const getCityFromLocation = async () => {
+      try {
+        // Get user's current location
+        if (navigator.geolocation) {
+          const position = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject);
+          });
+
+          const { latitude, longitude } = position.coords;
+
+          // Reverse geocode to get city name
+          const addressData = await coordinatesToAddress(latitude, longitude);
+          if (addressData && addressData.formattedAddress) {
+            // Extract city from formatted address (e.g., "City, State, Country")
+            // Format is typically: "Street, City, State ZIP, Country"
+            const parts = addressData.formattedAddress.split(",");
+            if (parts.length >= 2) {
+              // Get city and state (typically index 1 and 2)
+              const cityPart = parts[1]?.trim();
+              const statePart = parts[2]?.trim().split(" ")[0]; // Get state before ZIP
+              if (cityPart && statePart) {
+                setCity(`${cityPart}, ${statePart}`);
+              } else if (cityPart) {
+                setCity(cityPart);
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.log("Could not get user location, using default city:", err);
+        // Keep default city if geolocation fails
+      }
+    };
+
+    getCityFromLocation();
+  }, []);
+
+  // Load scenic photos based on city
   useEffect(() => {
     const loadScenic = async () => {
       setScenicError(null);
-      const city = "Blacksburg, VA";
+
       try {
         const res = await fetch(
-          `/api/scenic-photos?city=${encodeURIComponent(city)}&limit=6`
+          getApiUrl(
+            `/api/scenic-photos?city=${encodeURIComponent(city)}&limit=6`
+          )
         );
         if (!res.ok) {
           throw new Error("No scenic spots found");
@@ -35,7 +80,14 @@ function Home() {
           throw new Error("Server error - scenic photos unavailable");
         }
         const data = await res.json();
-        setScenic(data);
+        // Convert relative photo URLs to absolute URLs for deployment
+        const scenicWithAbsoluteUrls = data.map((item) => ({
+          ...item,
+          photoUrl: item.photoUrl.startsWith("http")
+            ? item.photoUrl
+            : getApiUrl(item.photoUrl),
+        }));
+        setScenic(scenicWithAbsoluteUrls);
         setScenicIndex(0);
       } catch (err) {
         console.error("Failed to load scenic photos", err);
@@ -45,7 +97,7 @@ function Home() {
     };
 
     loadScenic();
-  }, []);
+  }, [city]);
 
   return (
     <div className="home-container">
@@ -98,7 +150,7 @@ function Home() {
             <div className="home-scenic-header">
               <div>
                 <div className="home-scenic-label">Scenic nearby</div>
-                <div className="home-scenic-location">Blacksburg, VA</div>
+                <div className="home-scenic-location">{city}</div>
               </div>
               {scenic.length > 1 && (
                 <div className="home-scenic-controls">

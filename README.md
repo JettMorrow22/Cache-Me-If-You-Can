@@ -84,6 +84,42 @@ REACT_APP_GOOGLE_MAPS_API_KEY={REPLACE ME}
 JWT_SECRET={REPLACE ME}
 ```
 
+## Running with Docker Compose
+
+To run the application locally using Docker Compose:
+
+1. **Set up environment variables**: Create a `.env` file in the project root directory (or set environment variables) with the following values:
+
+   ```
+   DB_PASS=your_database_password
+   DB_USER=root
+   DB_NAME=cache_me_if_you_can_db
+   CLIENT_URL=http://localhost:3000
+   GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+   JWT_SECRET=your_jwt_secret
+   REACT_APP_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+   ```
+
+2. **Build and run the application**:
+
+   ```bash
+   docker compose up --build
+   ```
+
+   This will:
+
+   - Build the MySQL database container
+   - Build and start the backend server container
+   - Build and start the frontend client container
+   - Set up the necessary networking between containers
+
+3. **Access the application**:
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:5050
+   - Database: localhost:3307 (MySQL)
+
+The application will be fully containerized and ready to use. The frontend nginx server will automatically proxy API requests to the backend service.
+
 Server
 
 - You can start the backend by running node index.js in the server directory
