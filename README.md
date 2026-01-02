@@ -1,6 +1,6 @@
 ### GITLAB LINK: https://gitlab.com/natewilliams/CS4604-Group-Project
 
-## Cache Me If You Can cachemeifyoucan.discovery.cs.vt.edu
+## Cache Me If You Can https://cachemeifyoucan.discovery.cs.vt.edu
 
 ### Goal
 
