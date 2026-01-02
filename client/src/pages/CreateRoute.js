@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import {
   GoogleMap,
   Marker,
@@ -23,6 +23,8 @@ const mapContainerStyle = {
   height: "400px",
 };
 
+const GOOGLE_MAPS_LIBRARIES = ["places", "geometry"];
+
 /*
   -We have start/end Coords which is the coordinates of the start and end 
    locations that we select on the map.
@@ -41,7 +43,7 @@ const mapContainerStyle = {
    draw a line between them to make it look fully connected.
 
 */
-const CreateRoute = ({ onRouteCreated }) => {
+const CreateRoute = ({ onRouteCreated, isLoaded: parentIsLoaded }) => {
   const [startCoords, setStartCoords] = useState(null);
   const [endCoords, setEndCoords] = useState(null);
   const [startAddress, setStartAddress] = useState(null);
@@ -62,8 +64,30 @@ const CreateRoute = ({ onRouteCreated }) => {
   const directionsRendererRef = useRef(null);
   const initialDirectionsRef = useRef(null);
 
-  // Generate route
-  const generateRoute = async () => {
+  // Check if Google Maps is already loaded (when used as child component)
+  const isGoogleMapsAlreadyLoaded =
+    typeof window !== "undefined" &&
+    window.google &&
+    window.google.maps &&
+    window.google.maps.places &&
+    window.google.maps.geometry;
+
+  // Load Google Maps API only if not already loaded and not provided by parent
+  // When used inside NewRun, parentIsLoaded will be provided and Google Maps is already loaded
+  const { isLoaded: standaloneIsLoaded } = useJsApiLoader({
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
+    libraries: GOOGLE_MAPS_LIBRARIES,
+  });
+
+  // Use parent's isLoaded if provided, or check if already loaded, otherwise use standalone
+  const isLoaded =
+    parentIsLoaded !== undefined
+      ? parentIsLoaded
+      : isGoogleMapsAlreadyLoaded || standaloneIsLoaded;
+
+  // Generate route - memoized to prevent unnecessary re-renders
+  const generateRoute = useCallback(async () => {
+    if (!isLoaded) return; // Don't try to generate route if Google Maps isn't loaded
     try {
       const result = await requestDirections({
         origin: startCoords,
@@ -83,7 +107,7 @@ const CreateRoute = ({ onRouteCreated }) => {
     } catch (e) {
       alert("Could not generate route.");
     }
-  };
+  }, [startCoords, endCoords, isLoaded]);
 
   // Save route to DB
   const saveRoute = async () => {
@@ -193,16 +217,9 @@ const CreateRoute = ({ onRouteCreated }) => {
 
   // Generate route between start and end coords
   useEffect(() => {
-    if (!startCoords || !endCoords) return;
+    if (!startCoords || !endCoords || !isLoaded) return;
     generateRoute();
-  }, [startCoords, endCoords]);
-
-  // Currently have this to run this page alone, but we should pass libraries
-  // so that we are not reloading libraries
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
-    libraries: ["places", "geometry"],
-  });
+  }, [startCoords, endCoords, isLoaded, generateRoute]);
 
   // Make sure google apis are loaded before attempting to use them
   if (!isLoaded) {

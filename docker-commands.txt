@@ -1,0 +1,39 @@
+Docker Build, Tag, and Push Commands
+=====================================
+
+Replace the following placeholders:
+- YOUR_USERNAME: Your Docker Hub username or registry username
+- YOUR_TAG: Tag/version (e.g., latest, v1.0.0, etc.)
+- YOUR_REGISTRY: Registry URL (docker.io for Docker Hub, or registry.gitlab.com for GitLab, etc.)
+
+
+STEP 1: Build Docker Images
+----------------------------
+
+# Build server image
+docker build -t cs4604-group-project-server:latest -f server/Dockerfile server
+
+# Build client image
+cd "C:\Users\jett2\Desktop\Database Management\CS4604-Group-Project"; docker build --build-arg REACT_APP_API_URL=https://cacheme-backend.discovery.cs.vt.edu --build-arg REACT_APP_GOOGLE_MAPS_API_KEY=AIzaSyBYmgRi5r1glMYCAQo7tAqcrqNA5B6JjQg -t cs4604-group-project-client:latest -f client/Dockerfile client
+
+
+STEP 2: Tag Images for Registry
+--------------------------------
+
+# For Docker Hub:
+docker tag cs4604-group-project-server:latest jettmorrow/cache-me-docker-repo:server-latest
+docker tag cs4604-group-project-client:latest jettmorrow/cache-me-docker-repo:client-latest
+
+STEP 4: Push Images
+--------------------
+
+# For Docker Hub:
+docker push jettmorrow/cache-me-docker-repo:server-latest
+docker push jettmorrow/cache-me-docker-repo:client-latest
+
+
+OPTIONAL: Build with Environment Variables
+------------------------------------------
+
+# If you need to pass build arguments for the client (e.g., API keys):
+docker build --build-arg REACT_APP_GOOGLE_MAPS_API_KEY=YOUR_KEY --build-arg REACT_APP_API_URL=YOUR_URL -t cache-me-client:latest -f client/Dockerfile client/

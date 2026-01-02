@@ -15,7 +15,7 @@ function Layout() {
       <nav className="navbar">
         <div className="navbar-left">
           <Link to="/home" className="navbar-brand">
-            RunFinder
+            Cache Me If You Can
           </Link>
           <Link to="/home" className="nav-link">
             Home
@@ -38,11 +38,12 @@ function Layout() {
           {user && (
             <>
               <span className="navbar-welcome">
-                Welcome, <strong>{user.first_name} {user.last_name}</strong>
+                Welcome,{" "}
+                <strong>
+                  {user.first_name} {user.last_name}
+                </strong>
               </span>
-              <span className="navbar-user-type">
-                {getUserType()}
-              </span>
+              <span className="navbar-user-type">{getUserType()}</span>
             </>
           )}
           <Link to="/profile" className="nav-link">

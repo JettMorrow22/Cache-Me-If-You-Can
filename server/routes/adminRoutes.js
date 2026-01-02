@@ -114,18 +114,15 @@ router.put("/api/toggle-leader/:targetRunnerId", verifyToken, (req, res) => {
     const newLeaderStatus = !currentLeaderStatus;
 
     const updateSql = `UPDATE runners SET is_leader = ? WHERE runner_id = ?`;
-    db.query(
-      updateSql,
-      [newLeaderStatus, targetRunnerId],
-      (updateErr) => {
-        if (updateErr) {
-          console.error("Database update failed:", updateErr);
-          return res
-            .status(500)
-            .json({ error: "Failed to update leader status" });
-        }
+    db.query(updateSql, [newLeaderStatus, targetRunnerId], (updateErr) => {
+      if (updateErr) {
+        console.error("Database update failed:", updateErr);
+        return res
+          .status(500)
+          .json({ error: "Failed to update leader status" });
+      }
 
-        const getUpdatedSql = `SELECT
+      const getUpdatedSql = `SELECT
         runner_id,
         CONCAT(first_name, ' ', COALESCE(middle_initial, ''), ' ', last_name) AS full_name,
         email,
@@ -134,29 +131,26 @@ router.put("/api/toggle-leader/:targetRunnerId", verifyToken, (req, res) => {
         FROM runners
         WHERE runner_id = ?`;
 
-        db.query(getUpdatedSql, [targetRunnerId], (fetchErr, fetchResults) => {
-          if (fetchErr) {
-            console.error("Database query failed:", fetchErr);
-            return res.status(500).json({
-              error: "Leader status updated but failed to fetch user",
-            });
-          }
-
-          if (fetchResults.length === 0) {
-            return res
-              .status(404)
-              .json({ error: "User not found after update" });
-          }
-
-          res.json({
-            message: `User ${
-              newLeaderStatus ? "promoted to" : "removed from"
-            } leader successfully`,
-            user: fetchResults[0],
+      db.query(getUpdatedSql, [targetRunnerId], (fetchErr, fetchResults) => {
+        if (fetchErr) {
+          console.error("Database query failed:", fetchErr);
+          return res.status(500).json({
+            error: "Leader status updated but failed to fetch user",
           });
+        }
+
+        if (fetchResults.length === 0) {
+          return res.status(404).json({ error: "User not found after update" });
+        }
+
+        res.json({
+          message: `User ${
+            newLeaderStatus ? "promoted to" : "removed from"
+          } leader successfully`,
+          user: fetchResults[0],
         });
-      }
-    );
+      });
+    });
   });
 });
 
@@ -194,7 +188,9 @@ router.get("/api/admin-statistics", verifyToken, (req, res) => {
   db.query(sql, (err, results) => {
     if (err) {
       console.error("Database query failed for admin statistics:", err);
-      return res.status(500).json({ error: "Failed to fetch admin statistics" });
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch admin statistics" });
     }
 
     const row = results?.[0] || {};

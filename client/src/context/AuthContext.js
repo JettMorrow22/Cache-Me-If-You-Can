@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
+import { getApiUrl } from "../config/api";
 
 //creates context Object for sharing auth data
 const AuthContext = createContext();
@@ -12,7 +13,7 @@ export function AuthProvider({ children }) {
     const loadUser = async () => {
       try {
         // Cookies are automatically sent with fetch when credentials: 'include' is set
-        const response = await fetch("/api/me", {
+        const response = await fetch(getApiUrl("/api/me"), {
           credentials: "include", // Important: Include cookies in request
         });
 
@@ -37,7 +38,14 @@ export function AuthProvider({ children }) {
   // Login function - calls login endpoint, cookie is set automatically by server
   const login = async (email, password) => {
     try {
-      const response = await fetch("/login", {
+      const loginUrl = getApiUrl("/login");
+      console.log("Login: Calling API at:", loginUrl);
+      console.log(
+        "Login: API_BASE_URL is:",
+        process.env.REACT_APP_API_URL || "(not set, using proxy)"
+      );
+
+      const response = await fetch(loginUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -64,7 +72,7 @@ export function AuthProvider({ children }) {
   // Signup function - calls signup endpoint, cookie is set automatically by server
   const signup = async (signupData) => {
     try {
-      const response = await fetch("/signup", {
+      const response = await fetch(getApiUrl("/signup"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -96,7 +104,7 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     try {
       // Call logout endpoint to clear cookie on server
-      await fetch("/api/logout", {
+      await fetch(getApiUrl("/api/logout"), {
         method: "POST",
         credentials: "include",
       });
@@ -115,7 +123,9 @@ export function AuthProvider({ children }) {
   // Helper function to make authenticated API calls
   // Cookies are automatically sent with credentials: 'include'
   const authFetch = async (url, options = {}) => {
-    const response = await fetch(url, {
+    // Use getApiUrl to ensure proper URL construction
+    const apiUrl = url.startsWith("http") ? url : getApiUrl(url);
+    const response = await fetch(apiUrl, {
       ...options,
       credentials: "include", // Always include cookies
       headers: {

@@ -14,8 +14,10 @@ import { polylineOptions } from "../utils/map/directions";
 import polyline from "@mapbox/polyline";
 import { useAuth } from "../context/AuthContext";
 import "../styles/NewRun.css";
+import { getApiUrl } from "../config/api";
 
 const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+const GOOGLE_MAPS_LIBRARIES = ["places", "geometry"];
 
 function NewRun() {
   const { user, loading } = useAuth();
@@ -37,7 +39,7 @@ function NewRun() {
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
-    libraries: ["places", "geometry"],
+    libraries: GOOGLE_MAPS_LIBRARIES,
   });
 
   // Redirect non-leaders
@@ -51,7 +53,9 @@ function NewRun() {
 
   // Fetch available routes
   useEffect(() => {
-    fetch("/api/routes")
+    fetch(getApiUrl("/api/routes"), {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((data) => setRoutes(data))
       .catch((err) => console.error("Failed to fetch routes:", err));
@@ -91,7 +95,7 @@ function NewRun() {
 
   const fetchRouteDetails = async (routeId) => {
     try {
-      const res = await fetch(`/api/routes/${routeId}`);
+      const res = await fetch(getApiUrl(`/api/routes/${routeId}`));
       if (!res.ok) throw new Error("Failed to fetch route details");
       const data = await res.json();
       setSelectedRoute(data);
@@ -132,9 +136,10 @@ function NewRun() {
       return;
     }
 
-    fetch("/api/runs", {
+    fetch(getApiUrl("/api/runs"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify(form),
     })
       .then((res) => {
@@ -176,6 +181,7 @@ function NewRun() {
               <div>
                 <h3 className="new-run-route-title">Create a New Route</h3>
                 <CreateRoute
+                  isLoaded={isLoaded}
                   onRouteCreated={(routeId) => {
                     setForm((prev) => ({ ...prev, run_route: routeId }));
                     setCreatingRoute(false);

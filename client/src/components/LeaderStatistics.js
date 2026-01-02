@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { formatPace } from "../utils/paceFormatters";
 import "../styles/ProfileStatistics.css";
+import { getApiUrl } from "../config/api";
 
 function LeaderStatistics() {
   const [stats, setStats] = useState(null);
@@ -13,7 +14,7 @@ function LeaderStatistics() {
   const fetchStatistics = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/profile-statistics", {
+      const response = await fetch(getApiUrl("/api/profile-statistics"), {
         credentials: "include",
       });
 

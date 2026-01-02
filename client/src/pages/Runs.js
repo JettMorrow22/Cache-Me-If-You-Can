@@ -1,13 +1,16 @@
 // client/src/pages/Runs.js
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { getApiUrl } from "../config/api";
 
 function Runs() {
   const [runs, setRuns] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/runs")
+    fetch(getApiUrl("/api/runs"), {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((data) => {
         setRuns(data);
@@ -22,7 +25,10 @@ function Runs() {
   const handleDelete = (id) => {
     if (!window.confirm("Are you sure you want to delete this run?")) return;
 
-    fetch(`/api/runs/${id}`, { method: "DELETE" })
+    fetch(getApiUrl(`/api/runs/${id}`), {
+      method: "DELETE",
+      credentials: "include",
+    })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to delete run");
         setRuns((prev) => prev.filter((run) => run.run_id !== id));

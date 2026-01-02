@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../styles/ProfileAdmin.css";
+import { getApiUrl } from "../config/api";
 
 function ProfileAdmin() {
   const [runners, setRunners] = useState([]);
@@ -17,7 +18,7 @@ function ProfileAdmin() {
     try {
       setLoading(true);
       setError("");
-      const response = await fetch("/api/runners", {
+      const response = await fetch(getApiUrl("/api/runners"), {
         credentials: "include",
       });
 
@@ -41,7 +42,7 @@ function ProfileAdmin() {
       setError("");
       setSuccess("");
 
-      const response = await fetch(`/api/make-admin/${runnerId}`, {
+      const response = await fetch(getApiUrl(`/api/make-admin/${runnerId}`), {
         method: "PUT",
         credentials: "include",
         headers: {
@@ -75,13 +76,16 @@ function ProfileAdmin() {
       setError("");
       setSuccess("");
 
-      const response = await fetch(`/api/toggle-leader/${runnerId}`, {
-        method: "PUT",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        getApiUrl(`/api/toggle-leader/${runnerId}`),
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       const data = await response.json();
 

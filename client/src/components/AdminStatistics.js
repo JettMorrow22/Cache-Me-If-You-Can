@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { formatPace } from "../utils/paceFormatters";
 import "../styles/ProfileStatistics.css";
+import { getApiUrl } from "../config/api";
 
 function AdminStatistics() {
   const [stats, setStats] = useState(null);
@@ -12,7 +13,7 @@ function AdminStatistics() {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch("/api/admin-statistics", {
+        const response = await fetch(getApiUrl("/api/admin-statistics"), {
           credentials: "include",
         });
 
@@ -57,9 +58,7 @@ function AdminStatistics() {
   return (
     <div className="profile-statistics-container">
       <div className="profile-statistics-section">
-        <h2 className="profile-statistics-section-title">
-          Admin Statistics
-        </h2>
+        <h2 className="profile-statistics-section-title">Admin Statistics</h2>
         <div className="profile-statistics-grid">
           <div className="profile-statistics-card">
             <div className="profile-statistics-label">Total Runs</div>

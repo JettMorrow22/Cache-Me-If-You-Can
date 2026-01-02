@@ -1,6 +1,7 @@
 /**
  * Service for route-related API calls
  */
+import { getApiUrl } from "../config/api";
 
 /**
  * Fetches saved routes for the logged-in user
@@ -8,7 +9,7 @@
  */
 export const fetchSavedRoutes = async () => {
   try {
-    const response = await fetch("/api/routes", {
+    const response = await fetch(getApiUrl("/api/routes"), {
       credentials: "include",
     });
 
@@ -31,7 +32,7 @@ export const fetchSavedRoutes = async () => {
  */
 export const deleteSavedRoute = async (routeId) => {
   try {
-    const response = await fetch(`/api/routes/${routeId}`, {
+    const response = await fetch(getApiUrl(`/api/routes/${routeId}`), {
       method: "DELETE",
       credentials: "include",
     });

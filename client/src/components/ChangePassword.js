@@ -1,5 +1,6 @@
 import { React, useState } from "react";
 import "../styles/ChangePassword.css";
+import { getApiUrl } from "../config/api";
 
 /**
  * Component to change user password
@@ -42,7 +43,7 @@ function ChangePassword({ onNavigateBack }) {
 
     // Make API call to change password
     try {
-      const response = await fetch("/api/edit-password", {
+      const response = await fetch(getApiUrl("/api/edit-password"), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

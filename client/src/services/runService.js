@@ -2,6 +2,8 @@
  * Unified service for all run-related API calls
  */
 
+import { getApiUrl } from "../config/api";
+
 /**
  * Fetches public runs from the server with optional filters (for RunFinder)
  * @param {Object} filters - Filter object with paceMin, paceMax, distanceMin, distanceMax, dateFrom, dateTo, searchLeader, searchName
@@ -25,10 +27,18 @@ export const fetchPublicRuns = async (
   }
 
   // Add distance filters (in miles) - these override user account preferences if provided
-  if (filters.distanceMin !== "" && filters.distanceMin !== null && filters.distanceMin !== undefined) {
+  if (
+    filters.distanceMin !== "" &&
+    filters.distanceMin !== null &&
+    filters.distanceMin !== undefined
+  ) {
     queryParams.append("distanceMin", filters.distanceMin);
   }
-  if (filters.distanceMax !== "" && filters.distanceMax !== null && filters.distanceMax !== undefined) {
+  if (
+    filters.distanceMax !== "" &&
+    filters.distanceMax !== null &&
+    filters.distanceMax !== undefined
+  ) {
     queryParams.append("distanceMax", filters.distanceMax);
   }
 
@@ -55,7 +65,7 @@ export const fetchPublicRuns = async (
     queryParams.append("lng", locationForDistance.lng.toString());
   }
 
-  const res = await fetch(`/api/runs?${queryParams.toString()}`, {
+  const res = await fetch(getApiUrl(`/api/runs?${queryParams.toString()}`), {
     credentials: "include", // Include cookies to send JWT for user preferences
   });
   if (!res.ok) {
@@ -76,7 +86,7 @@ export const fetchMyRuns = async (filter, type) => {
     params.append("type", type);
   }
 
-  const response = await fetch(`/api/my-runs?${params.toString()}`, {
+  const response = await fetch(getApiUrl(`/api/my-runs?${params.toString()}`), {
     credentials: "include",
   });
 
@@ -94,7 +104,7 @@ export const fetchMyRuns = async (filter, type) => {
  */
 export const fetchRunParticipants = async (runId) => {
   try {
-    const response = await fetch(`/api/runs/${runId}/participants`, {
+    const response = await fetch(getApiUrl(`/api/runs/${runId}/participants`), {
       credentials: "include",
     });
 
@@ -123,7 +133,7 @@ export const fetchRunParticipants = async (runId) => {
  * @returns {Promise<void>}
  */
 export const leaveRun = async (runId) => {
-  const response = await fetch(`/api/runs/${runId}/leave`, {
+  const response = await fetch(getApiUrl(`/api/runs/${runId}/leave`), {
     method: "DELETE",
     credentials: "include",
   });
@@ -139,7 +149,7 @@ export const leaveRun = async (runId) => {
  * @returns {Promise<void>}
  */
 export const deleteRun = async (runId) => {
-  const response = await fetch(`/api/runs/${runId}`, {
+  const response = await fetch(getApiUrl(`/api/runs/${runId}`), {
     method: "DELETE",
     credentials: "include",
   });

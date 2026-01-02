@@ -4,6 +4,7 @@ import PaceSlider from "./PaceSlider";
 import { formatPace } from "../utils/paceFormatters";
 import { useNavigate } from "react-router-dom";
 import "../styles/ProfileDetails.css";
+import { getApiUrl } from "../config/api";
 /*
   I want to show all the fields of the runner
 
@@ -69,7 +70,7 @@ function ProfileDetails({ onNavigateToPassword }) {
 
     try {
       // Make your API call here to update the user
-      const response = await fetch("/api/edit-profile", {
+      const response = await fetch(getApiUrl("/api/edit-profile"), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

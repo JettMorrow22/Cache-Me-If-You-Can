@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import PaceSlider from "../components/PaceSlider";
+import { getApiUrl } from "../config/api";
 
 // Validation constants
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -110,7 +111,7 @@ export default function Signup() {
     const normEmail = email.trim().toLowerCase();
 
     try {
-      const response = await fetch("/signup/check", {
+      const response = await fetch(getApiUrl("/signup/check"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: normEmail }),
@@ -174,103 +175,123 @@ export default function Signup() {
   };
 
   return (
-    <div style={{ display: "grid", gap: 12, maxWidth: 360 }}>
-      <h2>Sign up</h2>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: "100vh",
+        padding: "1rem",
+      }}
+    >
+      <div style={{ display: "grid", gap: 12, maxWidth: 360, width: "100%" }}>
+        <h1 style={{ textAlign: "center" }}>Sign up</h1>
 
-      {step === 1 && (
-        <form onSubmit={handleStep1Submit} style={{ display: "grid", gap: 8 }}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button type="submit">Continue</button>
-        </form>
-      )}
-
-      {step === 2 && (
-        <form onSubmit={handleStep2Submit} style={{ display: "grid", gap: 8 }}>
-          <input
-            type="text"
-            placeholder="First name"
-            required
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Last name"
-            required
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Middle initial"
-            required
-            maxLength={1}
-            value={middleInitial}
-            onChange={handleMiddleInitialChange}
-          />
-          <label>
-            <input
-              type="checkbox"
-              checked={isLeader}
-              onChange={(e) => setIsLeader(e.target.checked)}
-            />
-            Leader?
-          </label>
-          <div
-            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}
+        {step === 1 && (
+          <form
+            onSubmit={handleStep1Submit}
+            style={{ display: "grid", gap: 8 }}
           >
-            <PaceSlider
-              label="Min Pace (min:sec per mile)"
-              value={minPace || ""}
-              onChange={setMinPace}
-              defaultValue={240}
-            />
-            <PaceSlider
-              label="Max Pace (min:sec per mile)"
-              value={maxPace || ""}
-              onChange={setMaxPace}
-              defaultValue={900}
+            <input
+              type="email"
+              placeholder="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
             <input
-              type="number"
-              placeholder="Min distance"
-              required
-              min="0"
-              step="1"
-              value={minDist}
-              onChange={(e) => setMinDist(e.target.value)}
+              type="password"
+              placeholder="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
-            <input
-              type="number"
-              placeholder="Max distance"
-              required
-              min="0"
-              step="1"
-              value={maxDist}
-              onChange={(e) => setMaxDist(e.target.value)}
-            />
-          </div>
-          <button type="submit">Create account</button>
-          <button type="button" onClick={() => setStep(1)}>
-            Back
-          </button>
-        </form>
-      )}
+            <button type="submit">Continue</button>
+          </form>
+        )}
 
-      {err && <div style={{ color: "crimson" }}>{err}</div>}
-      <div style={{ marginTop: "1rem", textAlign: "center" }}>
-        If you already have an account, <Link to="/login">Sign in</Link>
+        {step === 2 && (
+          <form
+            onSubmit={handleStep2Submit}
+            style={{ display: "grid", gap: 8 }}
+          >
+            <input
+              type="text"
+              placeholder="First name"
+              required
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Last name"
+              required
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Middle initial"
+              required
+              maxLength={1}
+              value={middleInitial}
+              onChange={handleMiddleInitialChange}
+            />
+            <label>
+              <input
+                type="checkbox"
+                checked={isLeader}
+                onChange={(e) => setIsLeader(e.target.checked)}
+              />
+              Leader?
+            </label>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 6,
+              }}
+            >
+              <PaceSlider
+                label="Min Pace (min:sec per mile)"
+                value={minPace || ""}
+                onChange={setMinPace}
+                defaultValue={240}
+              />
+              <PaceSlider
+                label="Max Pace (min:sec per mile)"
+                value={maxPace || ""}
+                onChange={setMaxPace}
+                defaultValue={900}
+              />
+              <input
+                type="number"
+                placeholder="Min distance"
+                required
+                min="0"
+                step="1"
+                value={minDist}
+                onChange={(e) => setMinDist(e.target.value)}
+              />
+              <input
+                type="number"
+                placeholder="Max distance"
+                required
+                min="0"
+                step="1"
+                value={maxDist}
+                onChange={(e) => setMaxDist(e.target.value)}
+              />
+            </div>
+            <button type="submit">Create account</button>
+            <button type="button" onClick={() => setStep(1)}>
+              Back
+            </button>
+          </form>
+        )}
+
+        {err && <div style={{ color: "crimson" }}>{err}</div>}
+        <div style={{ marginTop: "1rem", textAlign: "center" }}>
+          If you already have an account, <Link to="/login">Sign in</Link>
+        </div>
       </div>
     </div>
   );

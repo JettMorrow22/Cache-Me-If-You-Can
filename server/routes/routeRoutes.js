@@ -52,7 +52,27 @@ router.post("/api/save-route", verifyToken, async (req, res) => {
     (err, result) => {
       if (err) {
         console.error("/api/save-route error:", err);
-        return res.status(500).json({ error: "Failed to save route" });
+        console.error("Error details:", {
+          code: err.code,
+          errno: err.errno,
+          sqlMessage: err.sqlMessage,
+          sqlState: err.sqlState,
+        });
+        console.error("Data being inserted:", {
+          start_lat,
+          start_lng,
+          end_lat,
+          end_lng,
+          start_address,
+          end_address,
+          polyline_length: polyline?.length,
+          distance,
+        });
+        return res.status(500).json({
+          error: "Failed to save route",
+          details:
+            process.env.NODE_ENV === "development" ? err.message : undefined,
+        });
       }
 
       const newRouteId = result.insertId;

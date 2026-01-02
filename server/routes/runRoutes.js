@@ -248,15 +248,8 @@ router.get("/api/leaders", (req, res) => {
 // PUT update an existing run
 router.put("/api/runs/:id", (req, res) => {
   const { id } = req.params;
-  const {
-    leader_id,
-    run_route,
-    name,
-    description,
-    pace,
-    date,
-    start_time,
-  } = req.body;
+  const { leader_id, run_route, name, description, pace, date, start_time } =
+    req.body;
 
   if (
     !leader_id &&
@@ -405,7 +398,7 @@ router.delete("/api/runs/:runId/leave", verifyToken, (req, res) => {
 
       if (runResult[0].leader_id === runnerId) {
         return res.status(403).json({
-          error: "Run leaders cannot leave their own runs"
+          error: "Run leaders cannot leave their own runs",
         });
       }
 
@@ -587,7 +580,9 @@ router.get("/api/runs/:runId/participants", verifyToken, (req, res) => {
     (err, runResult) => {
       if (err) {
         console.error("Error checking run leader:", err);
-        return res.status(500).json({ error: "Failed to verify run ownership" });
+        return res
+          .status(500)
+          .json({ error: "Failed to verify run ownership" });
       }
 
       if (runResult.length === 0) {
@@ -595,7 +590,9 @@ router.get("/api/runs/:runId/participants", verifyToken, (req, res) => {
       }
 
       if (runResult[0].leader_id !== runnerId) {
-        return res.status(403).json({ error: "Only the run leader can view participants" });
+        return res
+          .status(403)
+          .json({ error: "Only the run leader can view participants" });
       }
 
       const sql = `
@@ -613,7 +610,9 @@ router.get("/api/runs/:runId/participants", verifyToken, (req, res) => {
       db.query(sql, [runId], (participantErr, participants) => {
         if (participantErr) {
           console.error("Error fetching participants:", participantErr);
-          return res.status(500).json({ error: "Failed to fetch participants" });
+          return res
+            .status(500)
+            .json({ error: "Failed to fetch participants" });
         }
 
         res.json(participants);
@@ -623,53 +622,67 @@ router.get("/api/runs/:runId/participants", verifyToken, (req, res) => {
 });
 
 // DELETE a participant from a run (leaders only)
-router.delete("/api/runs/:runId/participants/:participantId", verifyToken, (req, res) => {
-  const runnerId = req.user?.runner_id;
-  const { runId, participantId } = req.params;
+router.delete(
+  "/api/runs/:runId/participants/:participantId",
+  verifyToken,
+  (req, res) => {
+    const runnerId = req.user?.runner_id;
+    const { runId, participantId } = req.params;
 
-  if (!runnerId) {
-    return res.status(401).json({ error: "Unauthorized: must be logged in" });
-  }
-
-  if (!runId || !participantId) {
-    return res.status(400).json({ error: "Run ID and Participant ID are required" });
-  }
-
-  db.query(
-    "SELECT leader_id FROM runs WHERE run_id = ?",
-    [runId],
-    (err, runResult) => {
-      if (err) {
-        console.error("Error checking run leader:", err);
-        return res.status(500).json({ error: "Failed to verify run ownership" });
-      }
-
-      if (runResult.length === 0) {
-        return res.status(404).json({ error: "Run not found" });
-      }
-
-      if (runResult[0].leader_id !== runnerId) {
-        return res.status(403).json({ error: "Only the run leader can remove participants" });
-      }
-
-      db.query(
-        "DELETE FROM run_participation WHERE participation_run_id = ? AND participation_runner_id = ?",
-        [runId, participantId],
-        (deleteErr, deleteResult) => {
-          if (deleteErr) {
-            console.error("Error removing participant:", deleteErr);
-            return res.status(500).json({ error: "Failed to remove participant" });
-          }
-
-          if (deleteResult.affectedRows === 0) {
-            return res.status(404).json({ error: "Participant not found in this run" });
-          }
-
-          res.json({ message: "Participant removed successfully" });
-        }
-      );
+    if (!runnerId) {
+      return res.status(401).json({ error: "Unauthorized: must be logged in" });
     }
-  );
-});
+
+    if (!runId || !participantId) {
+      return res
+        .status(400)
+        .json({ error: "Run ID and Participant ID are required" });
+    }
+
+    db.query(
+      "SELECT leader_id FROM runs WHERE run_id = ?",
+      [runId],
+      (err, runResult) => {
+        if (err) {
+          console.error("Error checking run leader:", err);
+          return res
+            .status(500)
+            .json({ error: "Failed to verify run ownership" });
+        }
+
+        if (runResult.length === 0) {
+          return res.status(404).json({ error: "Run not found" });
+        }
+
+        if (runResult[0].leader_id !== runnerId) {
+          return res
+            .status(403)
+            .json({ error: "Only the run leader can remove participants" });
+        }
+
+        db.query(
+          "DELETE FROM run_participation WHERE participation_run_id = ? AND participation_runner_id = ?",
+          [runId, participantId],
+          (deleteErr, deleteResult) => {
+            if (deleteErr) {
+              console.error("Error removing participant:", deleteErr);
+              return res
+                .status(500)
+                .json({ error: "Failed to remove participant" });
+            }
+
+            if (deleteResult.affectedRows === 0) {
+              return res
+                .status(404)
+                .json({ error: "Participant not found in this run" });
+            }
+
+            res.json({ message: "Participant removed successfully" });
+          }
+        );
+      }
+    );
+  }
+);
 
 module.exports = router;

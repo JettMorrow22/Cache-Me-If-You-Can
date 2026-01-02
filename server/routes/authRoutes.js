@@ -1,16 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../connection");
-const {
-  signup,
-  login,
-  getPwAndIdFromEmail,
-} = require("../accounts");
+const { signup, login, getPwAndIdFromEmail } = require("../accounts");
 const { generateJWT } = require("../auth");
-const {
-  normalizeInteger,
-  validateSignupData,
-} = require("../utils/validation");
+const { normalizeInteger, validateSignupData } = require("../utils/validation");
 
 // Post to check whether the email and password are available for signup
 router.post("/signup/check", async (req, res) => {
@@ -117,20 +110,21 @@ router.post("/signup", async (req, res) => {
 
 // Login - returns user and sets auth cookie
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return res.status(400).json({ error: "email and password required" });
-  }
-
-  const result = await login(email, password);
-  if (result === -1) {
-    return res.status(401).json({ error: "email not found" });
-  }
-  if (result === -2) {
-    return res.status(401).json({ error: "incorrect password" });
-  }
-
   try {
+    console.log("Login request received from origin:", req.headers.origin);
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: "email and password required" });
+    }
+
+    const result = await login(email, password);
+    if (result === -1) {
+      return res.status(401).json({ error: "email not found" });
+    }
+    if (result === -2) {
+      return res.status(401).json({ error: "incorrect password" });
+    }
+
     db.query(
       "SELECT runner_id, first_name, last_name, middle_initial, email, is_leader, is_admin, min_pace, max_pace, min_dist_pref, max_dist_pref FROM runners WHERE runner_id = ?",
       [result],
@@ -160,7 +154,7 @@ router.post("/login", async (req, res) => {
       }
     );
   } catch (err) {
-    console.error("login error:", err);
+    console.error("Login error:", err);
     return res.status(500).json({ error: "Server error" });
   }
 });

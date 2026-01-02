@@ -3,6 +3,7 @@ import { formatPace } from "../utils/paceFormatters";
 import { getStaticMapUrl } from "../utils/mapUtils";
 import { convertTo12Hour } from "../utils/timeUtils";
 import "../styles/ProfileStatistics.css";
+import { getApiUrl } from "../config/api";
 
 function ProfileStatistics() {
   const [stats, setStats] = useState(null);
@@ -17,7 +18,7 @@ function ProfileStatistics() {
     try {
       setLoading(true);
       // Query that gets data for runners and leaders
-      const response = await fetch("/api/profile-statistics", {
+      const response = await fetch(getApiUrl("/api/profile-statistics"), {
         credentials: "include",
       });
 
@@ -29,7 +30,7 @@ function ProfileStatistics() {
       setStats(data);
 
       // Fetch most recent run
-      const secondResponse = await fetch("/api/most-recent-run", {
+      const secondResponse = await fetch(getApiUrl("/api/most-recent-run"), {
         credentials: "include",
       });
 

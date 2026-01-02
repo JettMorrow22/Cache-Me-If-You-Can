@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   GoogleMap,
   Marker,
@@ -12,6 +18,7 @@ import FilterForm from "../components/FilterForm";
 import { buildIcons } from "../utils/map/icons";
 import { useAuth } from "../context/AuthContext";
 import "../styles/RunFinder.css";
+import { getApiUrl } from "../config/api";
 
 const mapOptions = {
   streetViewControl: false,
@@ -23,6 +30,7 @@ const mapOptions = {
 
 // Constants
 const DEFAULT_LOCATION = { lat: 37.2296, lng: -80.4139 }; // Blacksburg
+const GOOGLE_MAPS_LIBRARIES = ["places", "geometry"];
 
 // Helper functions
 const getRunCoords = (run) => ({
@@ -37,7 +45,7 @@ const getRunEndCoords = (run) => ({
 
 const saveRoute = async (routeId) => {
   try {
-    const response = await fetch(`/api/routes/save/${routeId}`, {
+    const response = await fetch(getApiUrl(`/api/routes/save/${routeId}`), {
       method: "POST",
       credentials: "include", // to send HTTP-only cookies
       headers: {
@@ -53,27 +61,6 @@ const saveRoute = async (routeId) => {
   } catch (err) {
     console.error("Error saving route:", err);
     alert("Error saving route");
-  }
-};
-
-const joinRun = async (runId) => {
-  try {
-    const response = await fetch(`/api/runs/${runId}/join`, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (!response.ok) {
-      const data = await response.json();
-      alert(data.error || "Failed to join run");
-      return;
-    }
-    alert("Joined run successfully!");
-  } catch (err) {
-    console.error("Error joining run:", err);
-    alert("Error joining run");
   }
 };
 
@@ -112,7 +99,7 @@ function RunFinder() {
   // Load Google Maps API
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
-    libraries: ["places", "geometry"],
+    libraries: GOOGLE_MAPS_LIBRARIES,
     onError: () => {
       alert("google maps api not working");
     },
@@ -125,8 +112,14 @@ function RunFinder() {
         ...prevFilters,
         paceMin: user.min_pace || "",
         paceMax: user.max_pace || "",
-        distanceMin: user.min_dist_pref !== null && user.min_dist_pref !== undefined ? user.min_dist_pref : "",
-        distanceMax: user.max_dist_pref !== null && user.max_dist_pref !== undefined ? user.max_dist_pref : "",
+        distanceMin:
+          user.min_dist_pref !== null && user.min_dist_pref !== undefined
+            ? user.min_dist_pref
+            : "",
+        distanceMax:
+          user.max_dist_pref !== null && user.max_dist_pref !== undefined
+            ? user.max_dist_pref
+            : "",
       }));
     }
   }, [user, loading]);
@@ -172,7 +165,7 @@ function RunFinder() {
 
   // Fetch runs from server with filters
   const fetchRuns = useCallback(async () => {
-        const data = await fetchPublicRuns(
+    const data = await fetchPublicRuns(
       filters,
       searchLocationCoords,
       userLocation
@@ -187,13 +180,62 @@ function RunFinder() {
     }
   }, [filters, searchLocationCoords, userLocation]);
 
+  // Join a run and remove it from the displayed list
+  const joinRun = async (runId) => {
+    try {
+      const response = await fetch(getApiUrl(`/api/runs/${runId}/join`), {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        alert(data.error || "Failed to join run");
+        return;
+      }
+
+      // Remove the joined run from the list and update selected run if needed
+      const wasSelected = selectedRun?.run_id === runId;
+      setRuns((prevRuns) => {
+        const updatedRuns = prevRuns.filter((run) => run.run_id !== runId);
+
+        // Update selected run if the joined run was selected
+        if (wasSelected) {
+          const newSelected = updatedRuns[0] || null;
+          setSelectedRun(newSelected);
+          if (newSelected) {
+            setMapCenter(getRunCoords(newSelected));
+          } else {
+            // If no runs remain, reset map center to user location or default
+            setMapCenter(userLocation || DEFAULT_LOCATION);
+          }
+        }
+
+        return updatedRuns;
+      });
+
+      alert("Joined run successfully!");
+    } catch (err) {
+      console.error("Error joining run:", err);
+      alert("Error joining run");
+    }
+  };
+
   // Clear all filters - reset to user preferences for pace/distance
   const clearFilters = () => {
     setFilters({
       paceMin: user?.min_pace || "",
       paceMax: user?.max_pace || "",
-      distanceMin: user?.min_dist_pref !== null && user?.min_dist_pref !== undefined ? user.min_dist_pref : "",
-      distanceMax: user?.max_dist_pref !== null && user?.max_dist_pref !== undefined ? user.max_dist_pref : "",
+      distanceMin:
+        user?.min_dist_pref !== null && user?.min_dist_pref !== undefined
+          ? user.min_dist_pref
+          : "",
+      distanceMax:
+        user?.max_dist_pref !== null && user?.max_dist_pref !== undefined
+          ? user.max_dist_pref
+          : "",
       dateFrom: "",
       dateTo: "",
       searchLeader: "",

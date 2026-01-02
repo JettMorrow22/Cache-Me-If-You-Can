@@ -6,3 +6,9 @@
 # Ignore .env files so we can each store our own local env variables
 /server/.env
 /client/.env
+.env
+
+#Ignore .dockerignore file
+.dockerignore
+/server/.dockerignore
+/client/.dockerignore
